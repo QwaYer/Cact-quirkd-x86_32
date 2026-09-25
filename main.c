@@ -1,24 +1,24 @@
 /*
- * quirkd — демон quirk-политик CactOS.
+ * quirkd — quirk policy daemon for CactOS.
  *
- * В ядре quirk-и применяются внутри драйверов (ACPI/XHCI/таймеры). Этот демон
- * добавляет юзерспейс-слой: по правилам из /etc/quirkd.conf следит за devfs и
- * помечает/игнорирует узлы, а также пишет диагностику в журнал.
+ * In the kernel, quirks are applied inside drivers (ACPI/XHCI/timers). This daemon
+ * adds a userspace layer: following the rules from /etc/quirkd.conf it watches devfs and
+ * marks/ignores nodes, and also writes diagnostics to the log.
  *
- * Формат правил (/etc/quirkd.conf), по одному на строку:
- *   quirk=<подстрока имени узла>:<action>
- *   action: report | ignore   (по умолчанию report)
+ * Rule format (/etc/quirkd.conf), one per line:
+ *   quirk=<node name substring>:<action>
+ *   action: report | ignore   (report by default)
  *
- * Пример:
+ * Example:
  *   quirk=tty:report
  *   quirk=fb0:ignore
  *
- * report — событие появления узла логируется и печатается;
- * ignore  — появление узла логируется как «подавлено» и не печатается.
+ * report — node appearance event is logged and printed;
+ * ignore  — node appearance is logged as «suppressed» and not printed.
  *
- * Запускается супервизором cgoct как /sbin/quirkd.
+ * Started by the cgoct supervisor as /sbin/quirkd.
  *
- * /etc/quirkd.conf (необязательные ключи; создаётся при первом запуске):
+ * /etc/quirkd.conf (optional keys; created on first start):
  *   file=/var/log/quirkd.log
  *   console=0
  *   interval=5
@@ -61,14 +61,14 @@ struct snapshot {
 
 static struct snapshot prev_snap;
 
-/* Конфиг по умолчанию: пишется при первом запуске, если файла ещё нет. */
+/* Default config: written on first start if the file does not exist yet. */
 static const char default_config[] =
     "# quirkd config - auto-generated on first start.\n"
     "#\n"
-    "# file     - журнал событий\n"
-    "# console  - дублировать на /dev/console (0|1)\n"
-    "# interval - период опроса /dev (сек)\n"
-    "# quirk    - правило <подстрока имени узла>:report|ignore (можно несколько)\n"
+    "# file     - event log\n"
+    "# console  - duplicate to /dev/console (0|1)\n"
+    "# interval - /dev poll period (sec)\n"
+    "# quirk    - rule <node name substring>:report|ignore (can be repeated)\n"
     "\n"
     "file=/var/log/quirkd.log\n"
     "console=0\n"
